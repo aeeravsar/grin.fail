@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Public Grin node index">
+  <title>grin.fail - grin nodes</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="notice grin">
+      <h1>grin.fail</h1>
+      <p>Explore Grin nodes or submit your own for the good of the public.</p>
+      <p>Remember, it is always the best practice to use your own node.</p>
+    </section>
+
+    {{if .Message}}<p class="notice ok">{{.Message}}</p>{{end}}
+    {{if .Error}}<p class="notice danger">{{.Error}}</p>{{end}}
+
+    <section id="add" class="panel">
+      <h2>Add a Node</h2>
+      <p>Submit your node API URL. Chain and network types are automatically detected.</p>
+      <form method="post" action="/add" class="add-form">
+        <div class="url-field">
+          <label for="node_url">Node URL</label>
+          <input id="node_url" name="node_url" required placeholder="https://main.grin.example.org">
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+      <pre>curl -X POST https://grin.fail/add -d node_url="https://main.grin.example.org"</pre>
+    </section>
+
+    <section class="stats" aria-label="Node summary">
+      <div><strong>{{.Stats.Total}}</strong><span>Total</span></div>
+      <div><strong>{{.Stats.Healthy}}</strong><span>Healthy</span></div>
+      <div><strong>{{.Stats.Mainnet}}</strong><span>Mainnet</span></div>
+      <div><strong>{{.Stats.Testnet}}</strong><span>Testnet</span></div>
+      <div><strong>{{.Stats.Clearnet}}</strong><span>Clearnet</span></div>
+      <div><strong>{{.Stats.Onion}}</strong><span>Onion</span></div>
+      <div><strong>{{.Stats.I2P}}</strong><span>I2P</span></div>
+    </section>
+
+    <section id="findnodes" class="panel">
+      <div class="section-head">
+        <h2>Find a Node</h2>
+        <form method="get" action="/#findnodes" class="filters">
+          <div class="filter-field">
+            <label for="chain_filter">Chain</label>
+            <select id="chain_filter" name="chain">
+              <option value="all" {{if or (eq .ChainFilter "") (eq .ChainFilter "all")}}selected{{end}}>All</option>
+              <option value="mainnet" {{if eq .ChainFilter "mainnet"}}selected{{end}}>Mainnet</option>
+              <option value="testnet" {{if eq .ChainFilter "testnet"}}selected{{end}}>Testnet</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="type">Type</label>
+            <select id="type" name="type">
+              <option value="all" {{if or (eq .Filter "") (eq .Filter "all")}}selected{{end}}>All</option>
+              <option value="clearnet" {{if eq .Filter "clearnet"}}selected{{end}}>Clearnet</option>
+              <option value="onion" {{if eq .Filter "onion"}}selected{{end}}>Onion</option>
+              <option value="i2p" {{if eq .Filter "i2p"}}selected{{end}}>I2P</option>
+            </select>
+          </div>
+          <button type="submit">Filter</button>
+        </form>
+      </div>
+
+      {{if .Pagination.TotalNodes}}
+      <div class="pagination">
+        <span>Showing {{.Pagination.Start}}-{{.Pagination.End}} of {{.Pagination.TotalNodes}}</span>
+        <span>
+          {{if .Pagination.PrevURL}}<a class="button" href="{{.Pagination.PrevURL}}">Previous</a>{{end}}
+          {{if .Pagination.NextURL}}<a class="button" href="{{.Pagination.NextURL}}">Next</a>{{end}}
+        </span>
+      </div>
+      {{end}}
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Chain</th>
+              <th>Type</th>
+              <th>URL</th>
+              <th>Tip Height</th>
+              <th>Latency</th>
+              <th>Last Check</th>
+              <th>History</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .Nodes}}
+            <tr>
+              <td>{{if .Healthy}}<span class="pill good">OK</span>{{else}}<span class="pill bad">FAIL</span>{{end}}</td>
+              <td>{{.Chain}}</td>
+              <td>{{.Network}}</td>
+              <td class="url">
+                <a href="{{.URL}}" rel="nofollow">{{.URL}}</a>
+                {{if .Error}}<small>{{.Error}}</small>{{end}}
+              </td>
+              <td>{{if .Height}}{{.Height}}{{else}}-{{end}}</td>
+              <td>{{if .LatencyMS}}{{.LatencyMS}} ms{{else}}-{{end}}</td>
+              <td>{{if .LastCheckedAt.IsZero}}never{{else}}{{.LastCheckedAt.Format "2006-01-02 15:04 UTC"}}{{end}}</td>
+              <td class="history">
+                {{range .History}}<span class="{{if .}}up{{else}}down{{end}}"></span>{{end}}
+              </td>
+            </tr>
+            {{else}}
+            <tr>
+              <td colspan="8" class="empty">No nodes found.</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+
+      {{if .Pagination.TotalNodes}}
+      <div class="pagination bottom">
+        <span>Page {{.Pagination.Page}} of {{.Pagination.TotalPages}}</span>
+        <span>
+          {{if .Pagination.PrevURL}}<a class="button" href="{{.Pagination.PrevURL}}">Previous</a>{{end}}
+          {{if .Pagination.NextURL}}<a class="button" href="{{.Pagination.NextURL}}">Next</a>{{end}}
+        </span>
+      </div>
+      {{end}}
+    </section>
+
+    <footer>
+      <span>grin.fail - grin nodes</span>
+      <a href="/nodes.json">nodes.json</a>
+    </footer>
+  </main>
+</body>
+</html>
