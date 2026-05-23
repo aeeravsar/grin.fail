@@ -230,12 +230,6 @@ td {
   overflow-wrap: anywhere;
 }
 
-.url small {
-  display: block;
-  color: var(--red);
-  margin-top: 4px;
-}
-
 .pill {
   display: inline-block;
   min-width: 52px;

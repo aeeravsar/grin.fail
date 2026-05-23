@@ -26,7 +26,8 @@ const (
 	defaultAddr   = ":8080"
 	defaultDBPath = "nodes.json"
 	checkEvery    = time.Hour
-	checkTimeout  = 15 * time.Second
+	scheduleEvery = time.Minute
+	checkTimeout  = 60 * time.Second
 	failAfter     = 6 * checkEvery
 	deleteAfter   = 24 * checkEvery
 	historySize   = 6
@@ -230,7 +231,7 @@ func (a *App) handleJSON(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) checkLoop() {
 	a.checkDue()
-	ticker := time.NewTicker(checkEvery)
+	ticker := time.NewTicker(scheduleEvery)
 	defer ticker.Stop()
 	for range ticker.C {
 		a.checkDue()
